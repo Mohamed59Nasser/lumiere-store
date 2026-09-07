@@ -1,4 +1,6 @@
-import "dotenv/config";
+import { config } from "dotenv";
+
+config({ path: ".env.local" });
 
 const databaseUrl = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL;
 
