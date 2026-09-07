@@ -65,7 +65,7 @@ function AuthInner() {
         router.refresh();
       } else {
         setErr(
-          r.error === "auth_unavailable"
+          r.error === "auth_unavailable" || r.error === "database_unconfigured"
             ? "تعذر الاتصال بقاعدة البيانات، حاول مرة أخرى"
             : t(
                 r.error === "email_exists"

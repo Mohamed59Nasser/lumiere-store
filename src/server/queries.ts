@@ -298,23 +298,25 @@ export async function getProductData(id: string) {
   }[] = [];
   let myReview: { rating: number; comment: string } | null = null;
   if (product) {
-    reviews = await db
-      .select()
-      .from(s.reviews)
-      .where(eq(s.reviews.productId, id))
-      .orderBy(desc(s.reviews.createdAt))
-      .limit(30);
-    const sess = await getSession();
-    if (sess?.kind === "customer") {
-      const mine = await db
+    try {
+      reviews = await db
         .select()
         .from(s.reviews)
-        .where(
-          and(eq(s.reviews.productId, id), eq(s.reviews.customerId, sess.refId))
-        );
-      if (mine.length)
-        myReview = { rating: mine[0].rating, comment: mine[0].comment };
-    }
+        .where(eq(s.reviews.productId, id))
+        .orderBy(desc(s.reviews.createdAt))
+        .limit(30);
+      const sess = await getSession();
+      if (sess?.kind === "customer") {
+        const mine = await db
+          .select()
+          .from(s.reviews)
+          .where(
+            and(eq(s.reviews.productId, id), eq(s.reviews.customerId, sess.refId))
+          );
+        if (mine.length)
+          myReview = { rating: mine[0].rating, comment: mine[0].comment };
+      }
+    } catch {}
   }
   return { product, related, reviews, myReview };
 }

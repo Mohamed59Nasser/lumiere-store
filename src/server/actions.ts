@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/db";
+import { databaseConfigured } from "@/db";
 import * as s from "@/db/schema";
 import { eq, and, desc, sql, ne, inArray } from "drizzle-orm";
 import { createHash } from "crypto";
@@ -47,6 +48,7 @@ export async function registerCustomer(input: {
   password: string;
   guestWish?: string[];
 }): Promise<ActionResult> {
+  if (!databaseConfigured) return { ok: false, error: "database_unconfigured" };
   const name = input.name.trim();
   const email = input.email.trim().toLowerCase();
   const phone = input.phone.trim();
@@ -83,6 +85,7 @@ export async function loginUser(
   password: string,
   guestWish?: string[]
 ): Promise<ActionResult> {
+  if (!databaseConfigured) return { ok: false, error: "database_unconfigured" };
   const rows = await db
     .select()
     .from(s.customers)
