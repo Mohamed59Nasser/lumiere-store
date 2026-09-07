@@ -73,7 +73,8 @@ export async function registerCustomer(input: {
         .catch(() => null);
     }
   }
-  await createSession("customer", id);
+  if (!(await createSession("customer", id)))
+    return { ok: false, error: "auth_unavailable" };
   return { ok: true };
 }
 
@@ -98,7 +99,8 @@ export async function loginUser(
         .catch(() => null);
     }
   }
-  await createSession("customer", c.id);
+  if (!(await createSession("customer", c.id)))
+    return { ok: false, error: "auth_unavailable" };
   return { ok: true };
 }
 
@@ -348,7 +350,8 @@ export async function adminLogin(
   );
   if (!admin || admin.passwordHash !== sha256(password))
     return { ok: false, error: "bad" };
-  await createSession("admin", admin.id);
+  if (!(await createSession("admin", admin.id)))
+    return { ok: false, error: "auth_unavailable" };
   return { ok: true };
 }
 

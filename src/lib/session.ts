@@ -21,20 +21,23 @@ export async function getSession(): Promise<Session | null> {
   return { kind, refId: rows[0].refId } satisfies Session;
 }
 
-export async function createSession(kind: "customer" | "admin", refId: string) {
+export async function createSession(kind: "customer" | "admin", refId: string): Promise<boolean> {
   const token = randomBytes(24).toString("hex");
   const expiresAt = new Date(Date.now() + 30 * 24 * 3600 * 1000);
-  await db
-    .insert(sessions)
-    .values({ token, kind, refId, expiresAt })
-    .catch(() => null);
+  try {
+    await db.insert(sessions).values({ token, kind, refId, expiresAt });
+  } catch {
+    return false;
+  }
   const c = await cookies();
   c.set(COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 30 * 24 * 3600,
   });
+  return true;
 }
 
 export async function destroySession() {

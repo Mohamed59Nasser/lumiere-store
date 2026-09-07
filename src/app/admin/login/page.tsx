@@ -16,13 +16,22 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setErr("");
     setBusy(true);
-    const r = await adminLogin(username, password);
-    setBusy(false);
-    if (r.ok) {
-      router.replace("/admin");
-      router.refresh();
-    } else {
-      setErr("بيانات الدخول مش صحيحة");
+    try {
+      const r = await adminLogin(username, password);
+      if (r.ok) {
+        router.replace("/admin");
+        router.refresh();
+      } else {
+        setErr(
+          r.error === "auth_unavailable"
+            ? "تعذر الاتصال بقاعدة البيانات، حاول مرة أخرى"
+            : "بيانات الدخول مش صحيحة"
+        );
+      }
+    } catch {
+      setErr("تعذر الاتصال بقاعدة البيانات، حاول مرة أخرى");
+    } finally {
+      setBusy(false);
     }
   };
 

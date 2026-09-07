@@ -54,17 +54,32 @@ function AuthInner() {
     }
     setBusy(true);
     const wish = getGuestWish();
-    const r =
-      mode === "login"
-        ? await loginUser(email, password, wish)
-        : await registerCustomer({ name, email, phone, password, guestWish: wish });
-    setBusy(false);
-    if (r.ok) {
-      toast(t("saved"));
-      router.replace(next);
-      router.refresh();
-    } else {
-      setErr(t(r.error === "email_exists" ? "email_exists" : r.error === "wrong_credentials" ? "wrong_credentials" : "fill_all"));
+    try {
+      const r =
+        mode === "login"
+          ? await loginUser(email, password, wish)
+          : await registerCustomer({ name, email, phone, password, guestWish: wish });
+      if (r.ok) {
+        toast(t("saved"));
+        router.replace(next);
+        router.refresh();
+      } else {
+        setErr(
+          r.error === "auth_unavailable"
+            ? "تعذر الاتصال بقاعدة البيانات، حاول مرة أخرى"
+            : t(
+                r.error === "email_exists"
+                  ? "email_exists"
+                  : r.error === "wrong_credentials"
+                    ? "wrong_credentials"
+                    : "fill_all"
+              )
+        );
+      }
+    } catch {
+      setErr("تعذر الاتصال بقاعدة البيانات، حاول مرة أخرى");
+    } finally {
+      setBusy(false);
     }
   };
 
