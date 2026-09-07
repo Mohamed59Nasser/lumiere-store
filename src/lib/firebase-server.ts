@@ -1,10 +1,21 @@
 import type { ProductInfo, VariantInfo } from "@/server/queries";
 
 const databaseUrl =
-  process.env.FIREBASE_DATABASE_URL ??
+  process.env.FIREBASE_DATABASE_URL ||
   "https://mohamed-a9564-default-rtdb.firebaseio.com";
 
-export const firebaseConfigured = Boolean(databaseUrl);
+export const firebaseConfigured = (() => {
+  try {
+    const url = new URL(databaseUrl);
+    return (
+      url.protocol === "https:" &&
+      (url.hostname.endsWith("firebasedatabase.app") ||
+        url.hostname.endsWith("firebaseio.com"))
+    );
+  } catch {
+    return false;
+  }
+})();
 
 type FirebaseProduct = {
   id?: string | number;

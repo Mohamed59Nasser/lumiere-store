@@ -100,7 +100,7 @@ export function Navbar({
             {categories.slice(0, 4).map((c) => (
               <Link
                 key={c.id}
-                href={`/shop?cat=${c.id}`}
+                href={`/shop?cat=${encodeURIComponent(c.id)}`}
                 className="transition hover:text-gold-400"
               >
                 {lang === "ar" ? c.nameAr : c.nameEn}
@@ -204,7 +204,7 @@ export function Navbar({
               {categories.map((c) => (
                 <Link
                   key={c.id}
-                  href={`/shop?cat=${c.id}`}
+                  href={`/shop?cat=${encodeURIComponent(c.id)}`}
                   onClick={() => setOpen(false)}
                   className="rounded-lg px-3 py-2 text-cream-300 hover:bg-ink-800"
                 >
@@ -228,7 +228,8 @@ export function Footer({
 }) {
   const { t, lang } = useStore();
   const phone = settings.phone || "01159055625";
-  const wa = "2" + phone.replace(/^0/, "");
+  const whatsapp = settings.whatsapp || phone;
+  const wa = whatsapp.replace(/\D/g, "").replace(/^00/, "").replace(/^0/, "20");
   const email = settings.email || "care@lumiere.eg";
   const ig = settings.instagram || "lumiere.eg";
   const nameAr = settings.storeNameAr || "لوميير";
@@ -279,7 +280,7 @@ export function Footer({
             {categories.map((c) => (
               <li key={c.id}>
                 <Link
-                  href={`/shop?cat=${c.id}`}
+                  href={`/shop?cat=${encodeURIComponent(c.id)}`}
                   className="transition hover:text-gold-300"
                 >
                   {lang === "ar" ? c.nameAr : c.nameEn}
