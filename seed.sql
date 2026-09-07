@@ -53,7 +53,8 @@ INSERT INTO variants (id, product_id, label_ar, label_en, price, stock, image) V
 INSERT INTO customers (id, name, email, phone, password_hash, active, created_at) VALUES
  ('u1', 'سلمى محمد', 'salma@example.com', '01012345601', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', true, now() - interval '30 days'),
  ('u2', 'نورهان علي', 'nourhan@example.com', '01098765402', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', true, now() - interval '25 days'),
- ('u3', 'ملك حسن', 'malak@example.com', '01155544303', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', true, now() - interval '14 days');
+ ('u3', 'ملك حسن', 'malak@example.com', '01155544303', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', true, now() - interval '14 days'),
+ ('u4', 'Mohamed Nasser Fathy', 'mohamednasser555999@gmail.com', '01156426501', '447f33dff9727a1842841aa9fdbe93b77643f92b9865df55cffd2f4aad785942', true, now());
 
 INSERT INTO coupons (id, code, type, value, min_order, active, used_count) VALUES
  ('cp1', 'WELCOME10', 'percent', 10, 500, true, 4),

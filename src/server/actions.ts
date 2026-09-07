@@ -13,6 +13,7 @@ import {
 } from "@/lib/session";
 import { uid } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
+import { getAllProducts } from "@/server/queries";
 import {
   deleteFirebaseProduct,
   firebaseConfigured,
@@ -241,10 +242,17 @@ export async function placeOrder(input: {
     .where(inArray(s.variants.id, variantIds));
   const pMap = new Map(products.map((p) => [p.id, p]));
   const vMap = new Map(variants.map((v) => [v.id, v]));
+  const catalog = await getAllProducts();
+  const catalogMap = new Map(catalog.map((p) => [p.id, p]));
 
   // stock check
   for (const it of input.items) {
-    const v = vMap.get(it.variantId);
+    const p = pMap.get(it.productId) ?? catalogMap.get(it.productId);
+    const v =
+      vMap.get(it.variantId) ??
+      (p && "variants" in p
+        ? p.variants.find((variant) => variant.id === it.variantId) ?? p.variants[0]
+        : undefined);
     if (!v || !v.active || v.stock < it.qty)
       return { ok: false, error: "out_of_stock" };
   }
@@ -252,8 +260,11 @@ export async function placeOrder(input: {
   // compute totals from DB prices
   let subtotal = 0;
   const resolved = input.items.map((it) => {
-    const v = vMap.get(it.variantId)!;
-    const p = pMap.get(it.productId)!;
+    const p = pMap.get(it.productId) ?? catalogMap.get(it.productId)!;
+    const v = vMap.get(it.variantId) ??
+      ("variants" in p
+        ? p.variants.find((variant) => variant.id === it.variantId) ?? p.variants[0]
+        : undefined)!;
     subtotal += v.price * it.qty;
     return { it, v, p };
   });
@@ -319,18 +330,20 @@ export async function placeOrder(input: {
     await db.insert(s.orderItems).values({
       id: uid(),
       orderId,
-      productId: p.id,
-      variantId: v.id,
-      productName: v.labelAr ? `${p.nameAr}` : p.nameAr,
+      productId: pMap.has(p.id) ? p.id : null,
+      variantId: vMap.has(v.id) ? v.id : null,
+      productName: p.nameAr,
       variantLabel: v.labelAr,
       price: v.price,
       qty: it.qty,
       image: v.image || p.mainImage,
     });
-    await db
-      .update(s.variants)
-      .set({ stock: sql`${s.variants.stock} - ${it.qty}` })
-      .where(eq(s.variants.id, v.id));
+    if (vMap.has(v.id)) {
+      await db
+        .update(s.variants)
+        .set({ stock: sql`${s.variants.stock} - ${it.qty}` })
+        .where(eq(s.variants.id, v.id));
+    }
   }
 
   await db.insert(s.orderEvents).values({
